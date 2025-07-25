@@ -43,6 +43,9 @@ std::istream &operator>>(std::istream &is, cv::Scalar &color) {
 
 bool consume(std::istream &is, const std::string &str) {
     is >> std::ws;
+    if (!is) {
+        return false;
+    }
     for (const char c : str) {
         if (is.get() != c) {
             is.setstate(std::ios_base::failbit);
@@ -139,4 +142,46 @@ void string_art::add_string(
 
     float alpha = string.color[3] / 255.0f * (thickness / thickness_rounded);
     cv::addWeighted(line_img, alpha, image_roi, 1.0f - alpha, 0, image_roi);
+}
+
+cv::Mat string_art::StringArtPattern::to_image(const Metadata &metadata) const {
+    cv::Mat image(
+        cv::Size(metadata.canvas_width, metadata.canvas_height), CV_8UC4,
+        metadata.background_color
+    );
+    int current_color = 0;
+    int current_position = 0;
+    for (const Step &step : steps_) {
+        switch (step.action) {
+            case Action::CONNECT: {
+                add_string(
+                    image, metadata.positions[current_position],
+                    metadata.positions[step.value],
+                    metadata.palette[current_color], metadata.pixel_length
+                );
+                current_position = step.value;
+            } break;
+            case Action::CHANGE_COLOR: {
+                current_color = step.value;
+            } break;
+            default:
+                assert(false);
+        }
+    }
+
+    return image;
+}
+
+void StringArtPattern::add_step(const Step &step) {
+    steps_.push_back(step);
+    switch (step.action) {
+        case Action::CONNECT: {
+            current_position_ = step.value;
+        } break;
+        case Action::CHANGE_COLOR: {
+            current_color_ = step.value;
+        } break;
+        default:
+            assert(false);
+    }
 }

@@ -53,20 +53,6 @@ struct Metadata {
 std::ostream &operator<<(std::ostream &os, const Metadata &metadata);
 std::istream &operator>>(std::istream &is, Metadata &metadata);
 
-class StringArtPattern {
-private:
-    std::vector<Step> steps;
-
-public:
-    std::ostream &operator<<(std::ostream &os) const;
-    std::istream &operator>>(std::istream &is);
-    cv::Mat to_image() const;
-    void add_step(const Step &step);
-};
-
-// progress in percentage [0, 100]
-using progress_callback = std::function<void(float)>;
-
 void add_string(
     cv::Mat &image,
     const cv::Point2d &start,
@@ -74,5 +60,19 @@ void add_string(
     const String &string,
     float pixel_length
 );
+
+class StringArtPattern {
+private:
+    std::vector<Step> steps_;
+    int current_color_ = 0;
+    int current_position_ = 0;
+
+public:
+    cv::Mat to_image(const Metadata &metadata) const;
+    void add_step(const Step &step);
+};
+
+// progress in percentage [0, 100]
+using progress_callback = std::function<void(float)>;
 
 }  // namespace string_art
