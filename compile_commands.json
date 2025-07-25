@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/Users/nznyx/string-art/build/src",
+  "command": "/usr/bin/c++ -DBOOST_ATOMIC_DYN_LINK -DBOOST_ATOMIC_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_FILESYSTEM_NO_LIB -DBOOST_SYSTEM_DYN_LINK -DBOOST_SYSTEM_NO_LIB -Dmetric_mse_EXPORTS -I/Users/nznyx/string-art/include -isystem /opt/homebrew/include -isystem /opt/homebrew/Cellar/opencv/4.11.0_1/include/opencv4 -O3 -DNDEBUG -std=c++2b -arch arm64 -fPIC -o CMakeFiles/metric_mse.dir/metrics/mse.cpp.o -c /Users/nznyx/string-art/src/metrics/mse.cpp",
+  "file": "/Users/nznyx/string-art/src/metrics/mse.cpp",
+  "output": "src/CMakeFiles/metric_mse.dir/metrics/mse.cpp.o"
+},
+{
+  "directory": "/Users/nznyx/string-art/build/src",
+  "command": "/usr/bin/c++ -DBOOST_ATOMIC_DYN_LINK -DBOOST_ATOMIC_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_FILESYSTEM_NO_LIB -DBOOST_SYSTEM_DYN_LINK -DBOOST_SYSTEM_NO_LIB -I/Users/nznyx/string-art/include -isystem /opt/homebrew/include -isystem /opt/homebrew/Cellar/opencv/4.11.0_1/include/opencv4 -O3 -DNDEBUG -std=c++2b -arch arm64 -o CMakeFiles/string-art.dir/main.cpp.o -c /Users/nznyx/string-art/src/main.cpp",
+  "file": "/Users/nznyx/string-art/src/main.cpp",
+  "output": "src/CMakeFiles/string-art.dir/main.cpp.o"
+},
+{
+  "directory": "/Users/nznyx/string-art/build/src",
+  "command": "/usr/bin/c++ -DBOOST_ATOMIC_DYN_LINK -DBOOST_ATOMIC_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_FILESYSTEM_NO_LIB -DBOOST_SYSTEM_DYN_LINK -DBOOST_SYSTEM_NO_LIB -I/Users/nznyx/string-art/include -isystem /opt/homebrew/include -isystem /opt/homebrew/Cellar/opencv/4.11.0_1/include/opencv4 -O3 -DNDEBUG -std=c++2b -arch arm64 -o CMakeFiles/string-art.dir/string_art.cpp.o -c /Users/nznyx/string-art/src/string_art.cpp",
+  "file": "/Users/nznyx/string-art/src/string_art.cpp",
+  "output": "src/CMakeFiles/string-art.dir/string_art.cpp.o"
+}
+]
