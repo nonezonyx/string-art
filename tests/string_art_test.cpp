@@ -38,8 +38,8 @@ TEST(Operators, RandomStringEquality) {
         String string1 = random_string();
         String string2 = random_string();
         EXPECT_EQ(
-            string1 == string2, string1.color == string2.color &&
-                                    string1.thickness == string2.thickness
+            string1 == string2,
+            string1.color == string2.color && abs(string1.thickness - string2.thickness) < String::THICKNESS_EPSILON
         );
         EXPECT_TRUE(string1 == string1);
         EXPECT_TRUE(string2 == string2);
@@ -61,11 +61,10 @@ TEST(Serialization, RandomString) {
         std::stringstream ss;
         ss << string;
         EXPECT_EQ(
-            ss.str(), (std::stringstream{}
-                       << "String(RGBA(" << string.color[2] << ", "
-                       << string.color[1] << ", " << string.color[0] << ", "
-                       << string.color[3] << "), " << string.thickness << ")")
-                          .str()
+            ss.str(),
+            (std::stringstream{} << "String(RGBA(" << string.color[2] << ", " << string.color[1] << ", "
+                                 << string.color[0] << ", " << string.color[3] << "), " << string.thickness << ")")
+                .str()
         );
     }
 }
@@ -103,10 +102,9 @@ TEST(Serialization, DefaultMetadata) {
     ss << metadata;
     EXPECT_EQ(
         ss.str(),
-        "Metadata{background_color: RGBA(255, 255, 255, 255), lines: 2500, "
-        "canvas_width: "
-        "4096, "
-        "canvas_height: 4096, pixel_length: 1, string_thickness: 1}"
+        "Metadata{\n\tbackground_color: RGBA(255, 255, 255, 255)\n\tlines: 2500\n"
+        "\tcanvas_width: 4096\n\tcanvas_height: 4096\n"
+        "\tpixel_length: 1\n\tpallete: []\n\tpositions: []\n}"
     );
 }
 
@@ -116,17 +114,19 @@ TEST(Serialization, AltColorMetadata) {
     ss << metadata;
     EXPECT_EQ(
         ss.str(),
-        "Metadata{background_color: RGBA(30, 20, 10, 40), lines: 2500, "
-        "canvas_width: "
-        "4096, "
-        "canvas_height: 4096, pixel_length: 1, string_thickness: 1}"
+        "Metadata{\n\tbackground_color: RGBA(30, 20, 10, 40)\n\tlines: 2500\n"
+        "\tcanvas_width: 4096\n\tcanvas_height: 4096\n"
+        "\tpixel_length: 1\n\tpallete: []\n\tpositions: []\n}"
     );
 }
 
 TEST(Deserialization, Metadata) {
-    std::stringstream ss;
+    std::stringstream ss{
+        "Metadata{\n\tbackground_color: RGBA(30, 20, 10, 40)\n\tlines: 2500\n"
+        "\tcanvas_width: 4096\n\tcanvas_height: 4096\n"
+        "\tpixel_length: 1\n\tpallete: []\n\tpositions: []\n}"
+    };
     Metadata metadata{.background_color = {10, 20, 30, 40}};
-    ss << metadata;
     Metadata deserialized_metadata;
     EXPECT_TRUE(ss >> deserialized_metadata);
     EXPECT_EQ(deserialized_metadata, metadata);

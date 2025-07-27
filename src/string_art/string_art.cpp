@@ -5,8 +5,6 @@
 #include <opencv2/core/types.hpp>
 #include <ostream>
 
-using namespace string_art;
-
 namespace string_art {
 namespace {
 std::ostream &operator<<(std::ostream &os, const cv::Scalar &color) {
@@ -15,9 +13,7 @@ std::ostream &operator<<(std::ostream &os, const cv::Scalar &color) {
 }
 
 std::istream &operator>>(std::istream &is, cv::Scalar &color) {
-    static const std::map<char, int> color_map = {
-        {'R', 2}, {'G', 1}, {'B', 0}, {'A', 3}
-    };
+    static const std::map<char, int> color_map = {{'R', 2}, {'G', 1}, {'B', 0}, {'A', 3}};
     char color_pos[4];
     is >> color_pos[0] >> color_pos[1] >> color_pos[2] >> color_pos[3];
     char c;
@@ -54,20 +50,43 @@ bool consume(std::istream &is, const std::string &str) {
     }
     return true;
 }
-}  // namespace
-}  // namespace string_art
 
-bool String::operator==(const String &other) const {
-    return color == other.color &&
-           abs(thickness - other.thickness) < THICKNESS_EPSILON;
+std::ostream &operator<<(std::ostream &os, const cv::Point2d &point) {
+    return os << "Point2d(" << point.x << ", " << point.y << ")";
 }
 
-std::ostream &string_art::operator<<(std::ostream &os, const String &string) {
+std::istream &operator>>(std::istream &is, cv::Point2d &point) {
+    if (!consume(is, "Point2d")) {
+        return is;
+    }
+    if (!consume(is, "(")) {
+        return is;
+    }
+    is >> point.x;
+    if (!consume(is, ",")) {
+        return is;
+    }
+    is >> point.y;
+    if (!consume(is, ")")) {
+        return is;
+    }
+    return is;
+}
+}  // namespace
+
+bool String::operator==(const String &other) const {
+    return color == other.color && abs(thickness - other.thickness) < THICKNESS_EPSILON;
+}
+
+std::ostream &operator<<(std::ostream &os, const String &string) {
     return os << "String(" << string.color << ", " << string.thickness << ")";
 }
 
-std::istream &string_art::operator>>(std::istream &is, String &string) {
-    if (!consume(is, "String(")) {
+std::istream &operator>>(std::istream &is, String &string) {
+    if (!consume(is, "String")) {
+        return is;
+    }
+    if (!consume(is, "(")) {
         return is;
     }
     is >> string.color;
@@ -82,23 +101,122 @@ std::istream &string_art::operator>>(std::istream &is, String &string) {
 }
 
 bool Metadata::operator==(const Metadata &other) const {
-    return background_color == other.background_color &&
-           canvas_width == other.canvas_width &&
-           canvas_height == other.canvas_height &&
-           pixel_length == other.pixel_length && palette == other.palette &&
+    return background_color == other.background_color && canvas_width == other.canvas_width &&
+           canvas_height == other.canvas_height && pixel_length == other.pixel_length && pallete == other.pallete &&
            positions == other.positions;
 }
 
-std::ostream &
-string_art::operator<<(std::ostream &os, const Metadata &metadata) {
-    return os;
+std::ostream &operator<<(std::ostream &os, const Metadata &metadata) {
+    os << "Metadata{\n\tbackground_color: " << metadata.background_color << "\n";
+    os << "\tlines: " << metadata.lines << "\n";
+    os << "\tcanvas_width: " << metadata.canvas_width << "\n";
+    os << "\tcanvas_height: " << metadata.canvas_height << "\n";
+    os << "\tpixel_length: " << metadata.pixel_length << "\n";
+    os << "\tpallete: [";
+    if (!metadata.pallete.empty()) {
+        os << metadata.pallete.front();
+    }
+    for (std::size_t i = 1; i < metadata.pallete.size(); ++i) {
+        os << ", " << metadata.pallete[i];
+    }
+    os << "]\n";
+    os << "\tpositions: [";
+    if (!metadata.positions.empty()) {
+        os << metadata.positions.front();
+    }
+    for (std::size_t i = 1; i < metadata.positions.size(); ++i) {
+        os << ", " << metadata.positions[i];
+    }
+    return os << "]\n}";
 }
 
-std::istream &string_art::operator>>(std::istream &is, Metadata &metadata) {
+std::istream &operator>>(std::istream &is, Metadata &metadata) {
+    if (!consume(is, "Metadata")) {
+        return is;
+    }
+    if (!consume(is, "{")) {
+        return is;
+    }
+
+    std::string field;
+    while (is >> std::ws && is.peek() != '}') {
+        std::getline(is, field, ':');
+        field.erase(0, field.find_first_not_of(" \t\n\r\v"));
+        field.erase(field.find_last_not_of(" \t\n\r\v") + 1);
+        is >> std::ws;
+
+        if (field == "background_color") {
+            is >> metadata.background_color;
+        } else if (field == "lines") {
+            is >> metadata.lines;
+        } else if (field == "canvas_width") {
+            is >> metadata.canvas_width;
+        } else if (field == "canvas_height") {
+            is >> metadata.canvas_height;
+        } else if (field == "pixel_length") {
+            is >> metadata.pixel_length;
+        } else if (field == "pallete") {
+            if (!consume(is, "[")) {
+                return is;
+            }
+
+            metadata.pallete.clear();
+            is >> std::ws;
+
+            while (is && is.peek() != ']') {
+                String color;
+                if (is >> color) {
+                    metadata.pallete.push_back(color);
+                }
+                is >> std::ws;
+                if (is.peek() == ',') {
+                    is.ignore();
+                    is >> std::ws;
+                }
+            }
+
+            if (!consume(is, "]")) {
+                return is;
+            }
+        } else if (field == "positions") {
+            if (!consume(is, "[")) {
+                return is;
+            }
+
+            metadata.positions.clear();
+            is >> std::ws;
+
+            while (is && is.peek() != ']') {
+                cv::Point2d pos;
+                if (is >> pos) {
+                    metadata.positions.push_back(pos);
+                }
+
+                is >> std::ws;
+                if (is.peek() == ',') {
+                    is.ignore();
+                    is >> std::ws;
+                }
+            }
+
+            if (!consume(is, "]")) {
+                return is;
+            }
+        } else {
+            // Unknown field - set failbit and return
+            is.setstate(std::ios::failbit);
+            return is;
+        }
+        is >> std::ws;
+    }
+
+    if (!consume(is, "}")) {
+        return is;
+    }
     return is;
 }
 
-void string_art::add_string(
+void add_string(
     cv::Mat &image,
     const cv::Point2d &start,
     const cv::Point2d &end,
@@ -110,16 +228,10 @@ void string_art::add_string(
     int thickness_rounded = std::ceil(thickness);
 
     int margin = thickness_rounded + 2;
-    int min_x =
-        std::max(0, std::min(cvRound(start.x), cvRound(end.x)) - margin);
-    int min_y =
-        std::max(0, std::min(cvRound(start.y), cvRound(end.y)) - margin);
-    int max_x = std::min(
-        image.cols - 1, std::max(cvRound(start.x), cvRound(end.x)) + margin
-    );
-    int max_y = std::min(
-        image.rows - 1, std::max(cvRound(start.y), cvRound(end.y)) + margin
-    );
+    int min_x = std::max(0, std::min(cvRound(start.x), cvRound(end.x)) - margin);
+    int min_y = std::max(0, std::min(cvRound(start.y), cvRound(end.y)) - margin);
+    int max_x = std::min(image.cols - 1, std::max(cvRound(start.x), cvRound(end.x)) + margin);
+    int max_y = std::min(image.rows - 1, std::max(cvRound(start.y), cvRound(end.y)) + margin);
 
     if (min_x >= max_x || min_y >= max_y) {
         return;
@@ -134,8 +246,7 @@ void string_art::add_string(
 
     cv::line(
         line_img, cv::Point(cvRound(start_roi.x), cvRound(start_roi.y)),
-        cv::Point(cvRound(end_roi.x), cvRound(end_roi.y)), string.color,
-        thickness_rounded, cv::LINE_AA
+        cv::Point(cvRound(end_roi.x), cvRound(end_roi.y)), string.color, thickness_rounded, cv::LINE_AA
     );
 
     cv::Mat image_roi = image(roi);
@@ -144,20 +255,16 @@ void string_art::add_string(
     cv::addWeighted(line_img, alpha, image_roi, 1.0f - alpha, 0, image_roi);
 }
 
-cv::Mat string_art::StringArtPattern::to_image(const Metadata &metadata) const {
-    cv::Mat image(
-        cv::Size(metadata.canvas_width, metadata.canvas_height), CV_8UC4,
-        metadata.background_color
-    );
+cv::Mat StringArtPattern::to_image(const Metadata &metadata) const {
+    cv::Mat image(cv::Size(metadata.canvas_width, metadata.canvas_height), CV_8UC4, metadata.background_color);
     int current_color = 0;
     int current_position = 0;
     for (const Step &step : steps_) {
         switch (step.action) {
             case Action::CONNECT: {
                 add_string(
-                    image, metadata.positions[current_position],
-                    metadata.positions[step.value],
-                    metadata.palette[current_color], metadata.pixel_length
+                    image, metadata.positions[current_position], metadata.positions[step.value],
+                    metadata.pallete[current_color], metadata.pixel_length
                 );
                 current_position = step.value;
             } break;
@@ -185,3 +292,5 @@ void StringArtPattern::add_step(const Step &step) {
             assert(false);
     }
 }
+
+}  // namespace string_art

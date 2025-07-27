@@ -52,6 +52,8 @@ add_library(string_art_lib STATIC
     string_art.cpp
     abstract_metric.cpp
     abstract_solver.cpp
+    ${METRIC_SOURCES}
+    ${SOLVER_SOURCES}
 )
 
 target_link_libraries(string_art_lib

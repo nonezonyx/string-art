@@ -26,8 +26,8 @@ StringArtPattern GreedySolver::solve(
     std::shared_ptr<AbstractMetric> metric
 ) {
     StringArtPattern pattern;
-    cv::Mat curr(image.size(), CV_8UC3, metadata_.background_color);
-    // TODO
+    cv::Mat current(image.size(), CV_8UC4, metadata_.background_color);
+    float best_score = metric->distance(image, current);
     return pattern;
 }
 

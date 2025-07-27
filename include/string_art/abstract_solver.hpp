@@ -14,10 +14,8 @@ public:
 
     virtual std::string name() const = 0;
     virtual const Metadata &get_metadata() const = 0;
-    virtual StringArtPattern
-    solve(const cv::Mat &image, std::shared_ptr<AbstractMetric> metric) = 0;
+    virtual StringArtPattern solve(const cv::Mat &image, std::shared_ptr<AbstractMetric> metric) = 0;
 
-    static std::shared_ptr<AbstractSolver>
-    create(const Metadata &metadata, const progress_callback &progress);
+    static std::shared_ptr<AbstractSolver> create(const Metadata &metadata, const progress_callback &progress);
 };
 }  // namespace string_art

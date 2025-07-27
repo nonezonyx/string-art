@@ -37,15 +37,13 @@ std::ostream &operator<<(std::ostream &os, const String &string);
 std::istream &operator>>(std::istream &is, String &string);
 
 struct Metadata {
-    cv::Scalar background_color = {
-        255, 255, 255, 255
-    };  // canvas background color
-    int lines = 2500;                    // max number of lines
-    int canvas_width = 4096;             // canvas width in pixels
-    int canvas_height = 4096;            // canvas height in pixels
-    float pixel_length = 1.0f;           // canvas pixel length in milimeters
-    std::vector<String> palette;         // strings colors
-    std::vector<cv::Point2d> positions;  // nails positions
+    cv::Scalar background_color = {255, 255, 255, 255};  // canvas background color
+    int lines = 2500;                                    // max number of lines
+    int canvas_width = 4096;                             // canvas width in pixels
+    int canvas_height = 4096;                            // canvas height in pixels
+    float pixel_length = 1.0f;                           // canvas pixel length in milimeters
+    std::vector<String> pallete;                         // strings colors
+    std::vector<cv::Point2d> positions;                  // nails positions
 
     bool operator==(const Metadata &other) const;
 };
